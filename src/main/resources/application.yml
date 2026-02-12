@@ -1,9 +1,39 @@
 openai:
-  api-key: YOUR_KEY
+  hf-api-key: ${hf-api-key}
 
 whatsapp:
-  phone-id: 942189068982240
+  token: ${whatsapp-token}
+  phone-id: ${whatsapp-phone-id}
+  api-url: ${whatsapp-api-url}
 
 google:
+  refresh_token: ${google-refresh-token}
   drive:
-    folder-id: AI_TASK_FOLDER_ID
+    folder-id: ${google-drive-folder}
+
+zoho:
+  bigin:
+    client-id: ${zoho-bigin-client-id}
+    client-secret: ${zoho-bigin-client-secret}
+    account-url: ${zoho-bigin-account-url}
+    refresh-token: ${zoho-bigin-refresh-token}
+
+gmail:
+  client-id: ${gmail-client-id}
+  client-secret: ${gmail-client-secret}
+  refresh-token: ${gmail-refresh-token}
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+
+  jpa:
+    hibernate:
+      ddl-auto: update
