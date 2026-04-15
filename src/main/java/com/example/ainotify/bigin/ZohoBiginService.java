@@ -28,13 +28,13 @@ public class ZohoBiginService {
     @Autowired
     ZohoTokenManager zohoTokenManager;
 
-    public List<String> addCompanyNotes(String message) {
+    public List<String> addCompanyNotes(String message, String code) {
 
         List<String> companyIds = new ArrayList<>();
 
         try {
             String accessToken = zohoTokenManager.getAccessToken();
-            String getCompaniesListUrl = "https://www.zohoapis.in/bigin/v2/Accounts?fields=Account_Name";
+            String getCompaniesListUrl = "https://www.zohoapis.in/bigin/v2/Accounts?fields=Account_Name,code";
 
             HttpURLConnection con = (HttpURLConnection) new URL(getCompaniesListUrl).openConnection();
             con.setRequestMethod("GET");
@@ -62,12 +62,16 @@ public class ZohoBiginService {
                 for (int i = 0; i < dataArray.length(); i++) {
                     JSONObject company = dataArray.getJSONObject(i);
                     String id = company.getString("id");
-                    addNotes(id, accessToken, "Notes added at: "+ LocalDateTime.now() +". "+message);
+                    int companyCode = company.getInt("code");
+
+                    if(String.valueOf(companyCode).equals(code)){
+                        addNotes(id, accessToken, "Notes added at: "+ LocalDateTime.now() +". "+message);
+                    }
                     companyIds.add(id);
                 }
             } else {
                 stream = con.getErrorStream();
-                System.out.println("Response: Error in zoho api: "+stream.toString());
+                System.err.println("Response: Error in zoho api: "+stream.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,8 +106,8 @@ public class ZohoBiginService {
 
         try (CloseableHttpResponse response = httpClient.execute(post)) {
             String responseBody = EntityUtils.toString(response.getEntity());
-            System.out.println("HTTP Status: " + response.getStatusLine());
-            System.out.println("Response: " + responseBody);
+            //System.out.println("HTTP Status: " + response.getStatusLine());
+            //System.out.println("Response: " + responseBody);
         }
     }
 

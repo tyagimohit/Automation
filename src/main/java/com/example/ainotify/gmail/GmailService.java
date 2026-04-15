@@ -13,12 +13,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class GmailService {
 
     private Gmail gmail;
+
+    @Autowired
+    GmailDbService gmailDbService;
+
+    @Autowired
+    GmailFetchService gmailFetchService;
 
     @Autowired
     private ZohoBiginService zohoBiginService;
@@ -59,6 +68,16 @@ public class GmailService {
                 .build();
     }
 
+    public void markAsRead(String messageId) throws Exception {
+
+        ModifyMessageRequest request = new ModifyMessageRequest()
+                .setRemoveLabelIds(Collections.singletonList("UNREAD"));
+
+        gmail.users().messages()
+                .modify("me", messageId, request)
+                .execute();
+    }
+
     public List<GmailMessageResponse> getUnreadMessages() throws Exception {
 
         List<GmailMessageResponse> gmailMessageResponseList = new ArrayList<>();
@@ -79,20 +98,9 @@ public class GmailService {
                         .setFormat("full")
                         .execute();
 
-                System.out.println("------------------------------------------------");
-
-                System.out.println("Subject: " + getHeader(fullMessage, "Subject"));
-                System.out.println("From   : " + getHeader(fullMessage, "From"));
-                System.out.println("Date   : " + getHeader(fullMessage, "Date"));
-
+                String subject= getHeader(fullMessage, "Subject");
+                String code = getCode(subject);
                 String body = getEmailBody(fullMessage);
-                System.out.println("Body:\n" + body);
-
-                List<String> list = zohoBiginService.addCompanyNotes(body);
-
-                if(list.size()>=1){
-                    System.out.println("Notes added succesfully: "+list);
-                }
 
                 GmailMessageResponse gmailMessageResponse = new GmailMessageResponse();
                 gmailMessageResponse.setBody(body);
@@ -100,12 +108,44 @@ public class GmailService {
                 gmailMessageResponse.setSubject(getHeader(fullMessage, "Subject"));
                 gmailMessageResponse.setDate(getHeader(fullMessage, "Date"));
                 gmailMessageResponseList.add(gmailMessageResponse);
+
+                List<GmailMessage> msgList = gmailFetchService.getBySender(getHeader(fullMessage, "From"));
+
+                GmailMessage gmailMessage = msgList.stream().findFirst().orElse(null);
+                if(gmailMessage!=null) {
+                    if (!gmailMessage.getBody().equals(body)) {
+                        saveAndAddNotes(gmailMessageResponse, body, code);
+                    }
+                } else {
+                    saveAndAddNotes(gmailMessageResponse, body, code);
+                }
+                markAsRead(msg.getId());
             }
         }else{
             gmailMessageResponseList.add(new GmailMessageResponse());
         }
 
         return gmailMessageResponseList;
+    }
+
+    private void saveAndAddNotes(GmailMessageResponse gmailMessageResponse, String body, String code) {
+        gmailDbService.saveMessage(gmailMessageResponse);
+        List<String> list = zohoBiginService.addCompanyNotes(body, code);
+        if(list.size()>=1){
+            System.out.println("Notes added succesfully for company code "+ code);
+        }
+    }
+
+    private String getCode(String input){
+        Pattern pattern = Pattern.compile("(?i)code:(\\d+)");
+        Matcher matcher = pattern.matcher(input);
+        String codeValue = "0";
+        if (matcher.find()) {
+            codeValue = matcher.group(1);
+        } else {
+            System.out.println("Company Code not found");
+        }
+        return codeValue;
     }
 
     private static String getHeader(Message message, String name) {
