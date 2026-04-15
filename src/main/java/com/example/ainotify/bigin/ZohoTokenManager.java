@@ -40,6 +40,12 @@ public class ZohoTokenManager {
 
     private void refreshAccessToken() throws Exception {
 
+        System.out.println("ACCOUNTS_URL: " + ACCOUNTS_URL);
+        System.out.println("REFRESH_TOKEN: " + REFRESH_TOKEN);
+        System.out.println("CLIENT_ID: " + CLIENT_ID);
+        System.out.println("CLIENT_SECRET: " + CLIENT_SECRET);
+
+
         String urlStr = ACCOUNTS_URL
                 + "?grant_type=refresh_token"
                 + "&refresh_token=" + REFRESH_TOKEN
