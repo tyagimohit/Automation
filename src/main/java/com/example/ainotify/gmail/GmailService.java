@@ -112,8 +112,12 @@ public class GmailService {
                 List<GmailMessage> msgList = gmailFetchService.getBySender(getHeader(fullMessage, "From"));
 
                 GmailMessage gmailMessage = msgList.stream().findFirst().orElse(null);
+                System.out.println("gmailMessage object:"+gmailMessage);
                 if(gmailMessage!=null) {
+                    System.out.println("gmailMessage object: gmailMessage.getBody())"+gmailMessage.getBody());
+                    System.out.println("gmailMessage object:body : "+body);
                     if (!gmailMessage.getBody().equals(body)) {
+                        System.out.println("if gmailMessage.getBody().equals(body) :"+gmailMessage);
                         saveAndAddNotes(gmailMessageResponse, body, code);
                     }
                 } else {
@@ -129,8 +133,10 @@ public class GmailService {
     }
 
     private void saveAndAddNotes(GmailMessageResponse gmailMessageResponse, String body, String code) {
+        System.out.println("inside saveAndAddNotes ");
         gmailDbService.saveMessage(gmailMessageResponse);
         List<String> list = zohoBiginService.addCompanyNotes(body, code);
+        System.out.println("inside saveAndAddNotes list size : "+list);
         if(list.size()>=1){
             System.out.println("Notes added succesfully for company code "+ code);
         }
