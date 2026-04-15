@@ -11,16 +11,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class ZohoTokenManager {
 
-    @Value("${zoho.bigin.client-id}")
+    @Value("${ZOHO_BIGIN_CLIENT_ID}")
     private String CLIENT_ID;
 
-    @Value("${zoho.bigin.client-secret}")
+    @Value("${ZOHO_BIGIN_CLIENT_SECRET}")
     private String CLIENT_SECRET;
 
-    @Value("${zoho.bigin.refresh-token}")
+    @Value("${ZOHO_BIGIN_REFRESH_TOKEN}")
     private String REFRESH_TOKEN;
 
-    @Value("${zoho.bigin.account-url}")
+    @Value("${ZOHO_BIGIN_ACCOUNT_URL}")
     private String ACCOUNTS_URL;
 
     private static String accessToken;
