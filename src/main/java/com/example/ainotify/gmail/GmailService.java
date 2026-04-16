@@ -11,12 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.example.ainotify.bigin.MessageParser.parseMessage;
 
 @Service
 public class GmailService {
@@ -81,12 +80,12 @@ public class GmailService {
     public List<GmailMessageResponse> getUnreadMessages() throws Exception {
 
         List<GmailMessageResponse> gmailMessageResponseList = new ArrayList<>();
-        Gmail service = getGmail();
+        Gmail gmailService = getGmail();
 
-        ListMessagesResponse resp = service.users()
+        ListMessagesResponse resp = gmailService.users()
                 .messages()
                 .list("me")
-                .setQ("is:unread subject:\"demo-notes\" -subject:re -subject:fwd")
+                .setQ("is:unread subject:\"Daily Report\" -subject:re -subject:fwd")
                 .execute();
 
         List<Message> messageList = resp.getMessages();
@@ -109,20 +108,11 @@ public class GmailService {
                 gmailMessageResponse.setDate(getHeader(fullMessage, "Date"));
                 gmailMessageResponseList.add(gmailMessageResponse);
 
-                List<GmailMessage> msgList = gmailFetchService.getBySender(getHeader(fullMessage, "From"));
-
-                GmailMessage gmailMessage = msgList.stream().findFirst().orElse(null);
-                System.out.println("gmailMessage object:"+gmailMessage);
-                if(gmailMessage!=null) {
-                    System.out.println("gmailMessage object: gmailMessage.getBody())"+gmailMessage.getBody());
-                    System.out.println("gmailMessage object:body : "+body);
-                    if (!gmailMessage.getBody().equals(body)) {
-                        System.out.println("if gmailMessage.getBody().equals(body) :"+gmailMessage);
-                        saveAndAddNotes(gmailMessageResponse, body, code);
-                    }
-                } else {
-                    saveAndAddNotes(gmailMessageResponse, body, code);
+                Map<String, String> notesMap = parseMessage(body);
+                for(Map.Entry<String, String> m : notesMap.entrySet()){
+                    saveAndAddNotes(gmailMessageResponse, m.getValue(), m.getKey());
                 }
+
                 markAsRead(msg.getId());
             }
         }else{
