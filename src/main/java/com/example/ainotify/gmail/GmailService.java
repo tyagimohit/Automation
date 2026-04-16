@@ -97,8 +97,6 @@ public class GmailService {
                         .setFormat("full")
                         .execute();
 
-                String subject= getHeader(fullMessage, "Subject");
-                String code = getCode(subject);
                 String body = getEmailBody(fullMessage);
 
                 GmailMessageResponse gmailMessageResponse = new GmailMessageResponse();
@@ -109,6 +107,7 @@ public class GmailService {
                 gmailMessageResponseList.add(gmailMessageResponse);
 
                 Map<String, String> notesMap = parseMessage(body);
+                System.out.println("body map "+ notesMap.size());
                 for(Map.Entry<String, String> m : notesMap.entrySet()){
                     saveAndAddNotes(gmailMessageResponse, m.getValue(), m.getKey());
                 }
@@ -130,18 +129,6 @@ public class GmailService {
         if(list.size()>=1){
             System.out.println("Notes added succesfully for company code "+ code);
         }
-    }
-
-    private String getCode(String input){
-        Pattern pattern = Pattern.compile("(?i)code:(\\d+)");
-        Matcher matcher = pattern.matcher(input);
-        String codeValue = "0";
-        if (matcher.find()) {
-            codeValue = matcher.group(1);
-        } else {
-            System.out.println("Company Code not found");
-        }
-        return codeValue;
     }
 
     private static String getHeader(Message message, String name) {
