@@ -105,7 +105,7 @@ public class GmailService {
                 gmailMessageResponse.setSubject(getHeader(fullMessage, "Subject"));
                 gmailMessageResponse.setDate(getHeader(fullMessage, "Date"));
                 gmailMessageResponseList.add(gmailMessageResponse);
-
+                System.out.println("body map "+ body);
                 Map<String, String> notesMap = parseMessage(body);
                 System.out.println("body map "+ notesMap.size());
                 for(Map.Entry<String, String> m : notesMap.entrySet()){
