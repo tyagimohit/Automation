@@ -9,22 +9,28 @@ public class MessageParser {
 
         Map<String, String> map = new LinkedHashMap<>();
 
-        Pattern pattern = Pattern.compile(
-                "(?:\\d+\\.|[-•])\\s*(.*?)\\s*(.*?)(?=(?:\\n(?:\\d+\\.|[-•]))|$)",
-                Pattern.DOTALL
-        );
+        // Normalize text (important for Gmail content)
+        text = text.replaceAll("\\r", "")
+                .replaceAll("\\n+", "\n")
+                .trim();
 
-        Matcher matcher = pattern.matcher(text);
+        // Split based on numbering or bullets
+        String[] parts = text.split("(?=(\\d+\\.|[-•]))");
 
-        while (matcher.find()) {
+        for (String part : parts) {
 
-            String rawKey = matcher.group(1).trim();
-            String value = matcher.group(2).trim().replaceAll("\\s+", " ");
+            part = part.trim();
+            if (part.isEmpty()) continue;
 
-            String numberKey = extractOnlyNumber(rawKey);
+            // Extract number from company line
+            String numberKey = extractOnlyNumber(part);
 
-            // ✅ Only add if number exists
             if (numberKey != null) {
+                // Remove first line (company name part)
+                String value = part.replaceFirst("^(\\d+\\.|[-•])\\s*.*?\n?", "")
+                        .trim()
+                        .replaceAll("\\s+", " ");
+
                 map.put(numberKey, value);
             }
         }
@@ -32,21 +38,16 @@ public class MessageParser {
         return map;
     }
 
-    // 🔥 Extract ONLY number, otherwise return null
     private static String extractOnlyNumber(String input) {
 
         // (2) or [2]
         Matcher m1 = Pattern.compile("[\\(\\[]\\s*(\\d+)\\s*[\\)\\]]").matcher(input);
-        if (m1.find()) {
-            return m1.group(1);
-        }
+        if (m1.find()) return m1.group(1);
 
-        // number at end: "Company 2"
+        // number at end
         Matcher m2 = Pattern.compile("(\\d+)\\s*$").matcher(input);
-        if (m2.find()) {
-            return m2.group(1);
-        }
+        if (m2.find()) return m2.group(1);
 
-        return null; // ❌ skip if no number found
+        return null;
     }
 }
