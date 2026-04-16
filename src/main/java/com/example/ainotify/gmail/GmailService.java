@@ -105,13 +105,14 @@ public class GmailService {
                 gmailMessageResponse.setSubject(getHeader(fullMessage, "Subject"));
                 gmailMessageResponse.setDate(getHeader(fullMessage, "Date"));
                 gmailMessageResponseList.add(gmailMessageResponse);
-                System.out.println("body map "+ body);
+
+                body = cleanEmailText(body);
+                //System.out.println("body map "+ body);
                 Map<String, String> notesMap = parseMessage(body);
                 System.out.println("body map "+ notesMap.size());
                 for(Map.Entry<String, String> m : notesMap.entrySet()){
                     saveAndAddNotes(gmailMessageResponse, m.getValue(), m.getKey());
                 }
-
                 markAsRead(msg.getId());
             }
         }else{
@@ -122,7 +123,7 @@ public class GmailService {
     }
 
     private void saveAndAddNotes(GmailMessageResponse gmailMessageResponse, String body, String code) {
-        System.out.println("inside saveAndAddNotes ");
+
         gmailDbService.saveMessage(gmailMessageResponse);
         List<String> list = zohoBiginService.addCompanyNotes(body, code);
         System.out.println("inside saveAndAddNotes list size : "+list);
@@ -176,5 +177,15 @@ public class GmailService {
 
     private static String decode(String encoded) {
         return new String(Base64.getUrlDecoder().decode(encoded));
+    }
+
+    private static String cleanEmailText(String text) {
+
+        return text
+                // remove leading >, >>, >>> etc from each line
+                .replaceAll("(?m)^>+\\s*", "")
+                // remove extra spaces
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 }

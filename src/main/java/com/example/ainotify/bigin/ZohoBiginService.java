@@ -65,7 +65,7 @@ public class ZohoBiginService {
                     int companyCode = company.getInt("code");
 
                     if(String.valueOf(companyCode).equals(code)){
-                        addNotes(id, accessToken, "Notes added at: "+ LocalDateTime.now() +". "+message);
+                        addNotes(id, accessToken, message);
                     }
                     companyIds.add(id);
                 }
