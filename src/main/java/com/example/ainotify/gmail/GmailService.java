@@ -180,12 +180,11 @@ public class GmailService {
     }
 
     private static String cleanEmailText(String text) {
-
-        return text
-                // remove leading >, >>, >>> etc from each line
-                .replaceAll("(?m)^>+\\s*", "")
-                // remove extra spaces
-                .replaceAll("\\s+", " ")
+        String cleaned = text
+                .replaceAll("(?m)^>+\\s*", "")   // remove >>>>
+                .replaceAll("\\.\\s*(\\d+\\.)", ".\n$1") // fix numbering
                 .trim();
+
+        return cleaned;
     }
 }
