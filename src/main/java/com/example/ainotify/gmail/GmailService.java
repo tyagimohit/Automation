@@ -125,7 +125,7 @@ public class GmailService {
     private void saveAndAddNotes(GmailMessageResponse gmailMessageResponse, String body, String code) {
 
         gmailDbService.saveMessage(gmailMessageResponse);
-        List<String> list = zohoBiginService.addCompanyNotes(body, code);
+        List<String> list = zohoBiginService.addCompanyNotes(gmailMessageResponse.getFrom(), body, code);
         System.out.println("inside saveAndAddNotes list size : "+list);
         if(list.size()>=1){
             System.out.println("Notes added succesfully for company code "+ code);

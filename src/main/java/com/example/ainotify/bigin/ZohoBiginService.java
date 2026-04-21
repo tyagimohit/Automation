@@ -28,7 +28,7 @@ public class ZohoBiginService {
     @Autowired
     ZohoTokenManager zohoTokenManager;
 
-    public List<String> addCompanyNotes(String message, String code) {
+    public List<String> addCompanyNotes(String from, String message, String code) {
 
         List<String> companyIds = new ArrayList<>();
 
@@ -65,7 +65,7 @@ public class ZohoBiginService {
                     int companyCode = company.getInt("code");
 
                     if(String.valueOf(companyCode).equals(code)){
-                        addNotes(id, accessToken, message);
+                        addNotes(id, accessToken, from, message);
                     }
                     companyIds.add(id);
                 }
@@ -80,7 +80,7 @@ public class ZohoBiginService {
         return companyIds;
     }
 
-    private static void addNotes(String accountId, String accessToken, String notes) throws IOException {
+    private static void addNotes(String accountId, String accessToken, String title, String notes) throws IOException {
 
         String addNotesUrl = "https://www.zohoapis.in/bigin/v2/Notes";
 
@@ -94,13 +94,14 @@ public class ZohoBiginService {
 {
   "data": [
                         {
+                        "Note_Title": "%s",
                         "Note_Content": "%s",
                         "Parent_Id": "%s",
                         "$se_module": "Accounts"
                       }
           ]
 }
-""", escapeJson(notes), accountId);
+""", title, escapeJson(notes), accountId);
 
         post.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
 
